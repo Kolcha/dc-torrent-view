@@ -5,10 +5,83 @@
 #include "torrentfilesmodel.hpp"
 
 #include <QIcon>
+#include <QMimeDatabase>
 
 #include "utils.hpp"
 
 namespace {
+
+class FileIconProvider
+{
+public:
+  static FileIconProvider& instance();
+
+  QIcon icon(const QString& filename) const;
+
+  QIcon folder() const { return _folder_icon; }
+  QIcon unknown() const { return _unknown_icon; }
+
+protected:
+  FileIconProvider();
+
+private:
+  QIcon _folder_icon;
+  QIcon _unknown_icon;
+
+  QMimeDatabase _mdb;
+  mutable QHash<QString, QIcon> _icons_cache;
+};
+
+QIcon pick_fallback_icon(const QString& name)
+{
+  if (name.startsWith("application"))
+    return QIcon::fromTheme("application-octet-stream");
+  if (name.startsWith("audio"))
+    return QIcon::fromTheme("audio-x-generic");
+  if (name.startsWith("image"))
+    return QIcon::fromTheme("image-x-generic");
+  if (name.startsWith("package"))
+    return QIcon::fromTheme("package-x-generic");
+  if (name.startsWith("text"))
+    return QIcon::fromTheme("text-x-generic");
+  if (name.startsWith("video"))
+    return QIcon::fromTheme("video-x-generic");
+  return FileIconProvider::instance().unknown();
+}
+
+FileIconProvider& FileIconProvider::instance()
+{
+  static FileIconProvider inst;
+  return inst;
+}
+
+QIcon FileIconProvider::icon(const QString& filename) const
+{
+  auto ext = _mdb.suffixForFileName(filename);
+  if (ext.isEmpty()) {
+    return _unknown_icon;
+  }
+
+  if (auto iter = _icons_cache.find(ext); iter != _icons_cache.end()) {
+    return *iter;
+  }
+
+  auto types = _mdb.mimeTypesForFileName(filename);
+  QIcon ires;
+  if (types.empty()) {
+    ires = _unknown_icon;
+  } else {
+    const auto& mtype = types.first();
+    ires = QIcon::fromTheme(mtype.iconName(), pick_fallback_icon(mtype.name()));
+  }
+  _icons_cache[ext] = ires;
+  return ires;
+}
+
+FileIconProvider::FileIconProvider()
+  : _folder_icon(QIcon::fromTheme("folder"))
+  , _unknown_icon(QIcon::fromTheme("unknown"))
+{}
 
 FileNode* add_path(FileNode& root, QStringView path)
 {
@@ -139,7 +212,9 @@ QVariant TorrentFilesModel::data(const QModelIndex& index, int role) const
     case 0: {
       switch (role) {
         case Qt::DecorationRole:
-          return QIcon::fromTheme(node->nodes().empty() ? "unknown" : "folder");
+          return node->nodes().empty() ?
+                 FileIconProvider::instance().icon(node->name()) :
+                 FileIconProvider::instance().folder();
         case Qt::DisplayRole:
         case Qt::EditRole:
           return node->name();
