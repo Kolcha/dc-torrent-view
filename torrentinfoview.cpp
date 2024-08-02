@@ -92,6 +92,7 @@ TorrentInfoView::~TorrentInfoView()
 void TorrentInfoView::setTorrentInfo(const libtorrent::torrent_info& ti)
 {
   ui->label_name_v->setText(QString::fromStdString(ti.name()));
+  ui->label_type_v->setText(ti.priv() ? tr("private") : tr("public"));
 
   const bool has_comment = !ti.comment().empty();
   ui->label_comment_s->setVisible(has_comment);
