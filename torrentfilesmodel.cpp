@@ -21,6 +21,8 @@ public:
   QIcon folder() const { return _folder_icon; }
   QIcon unknown() const { return _unknown_icon; }
 
+  QString mimetype(const QString& filename) const;
+
 protected:
   FileIconProvider();
 
@@ -34,6 +36,8 @@ private:
 
 QIcon pick_fallback_icon(const QString& name)
 {
+  if (name == "application/vnd.efi.iso")
+    return QIcon::fromTheme("application-x-iso");
   if (name.startsWith("application"))
     return QIcon::fromTheme("application-octet-stream");
   if (name.startsWith("audio"))
@@ -76,6 +80,12 @@ QIcon FileIconProvider::icon(const QString& filename) const
   }
   _icons_cache[ext] = ires;
   return ires;
+}
+
+QString FileIconProvider::mimetype(const QString& filename) const
+{
+  auto types = _mdb.mimeTypesForFileName(filename);
+  return types.isEmpty() ? QString("unknown") : types.first().name();
 }
 
 FileIconProvider::FileIconProvider()
@@ -135,6 +145,8 @@ QVariant TorrentFilesModel::headerData(int section, Qt::Orientation orientation,
       return tr("Name");
     case 1:
       return tr("Size");
+    case 2:
+      return tr("Mime Type");
     default:
       break;
   }
@@ -196,7 +208,7 @@ int TorrentFilesModel::rowCount(const QModelIndex& parent) const
 int TorrentFilesModel::columnCount(const QModelIndex& parent) const
 {
   Q_UNUSED(parent);
-  return 2;
+  return 3;
 }
 
 QVariant TorrentFilesModel::data(const QModelIndex& index, int role) const
@@ -232,6 +244,19 @@ QVariant TorrentFilesModel::data(const QModelIndex& index, int role) const
           return node->size();
         case Qt::TextAlignmentRole:
           return static_cast<int>(Qt::AlignVCenter | Qt::AlignRight);
+        default:
+          break;
+      }
+      break;
+    }
+
+    case 2: {
+      switch (role) {
+        case Qt::DisplayRole:
+        case Qt::EditRole:
+          return node->nodes().empty() ?
+                 FileIconProvider::instance().mimetype(node->name()) :
+                 QString("-");
         default:
           break;
       }
