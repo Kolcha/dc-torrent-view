@@ -80,6 +80,8 @@ TorrentInfoView::TorrentInfoView(QWidget* parent)
   ui->trackers_list->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
   ui->trackers_list->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
   ui->trackers_list->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+  ui->splitter->setSizes({ui->trackers_list->minimumSizeHint().height(), height()});
 }
 
 TorrentInfoView::~TorrentInfoView()
@@ -107,6 +109,7 @@ void TorrentInfoView::setTorrentInfo(const libtorrent::torrent_info& ti)
   ui->label_files_v->setText(format_files(ti));
 
   trackers->setTorrentInfo(ti);
+  ui->trackers_list->setVisible(trackers->rowCount() > 0);
 
   files->setTorrentInfo(ti);
   if (ui->files_view->model()->rowCount(ui->files_view->rootIndex()) == 1) {
