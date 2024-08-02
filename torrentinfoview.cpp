@@ -36,7 +36,7 @@ QString format_hashes(const lt::torrent_info& ti)
     res += QByteArray(h.v1.data(), h.v1.size()).toHex();
   }
   if (h.has_v1() && h.has_v2()) {
-    res += ", ";
+    res += "\n";
   }
   if (h.has_v2()) {
     res += QByteArray(h.v2.data(), h.v2.size()).toHex();
@@ -46,17 +46,15 @@ QString format_hashes(const lt::torrent_info& ti)
 
 QString format_pieces(const lt::torrent_info& ti)
 {
-  return QString("%1 x %2")
+  return QString("%1 x %2 = %3")
          .arg(ti.num_pieces())
-         .arg(human_size(ti.piece_length()));
+         .arg(human_size(ti.piece_length()))
+         .arg(human_size(ti.total_size()));
 }
 
 QString format_files(const lt::torrent_info& ti)
 {
-  return QString("%1, %2 (%3)")
-         .arg(ti.num_files())
-         .arg(human_size(ti.total_size()))
-         .arg(ti.total_size());
+  return QString::number(ti.num_files());
 }
 
 } // namespace
@@ -92,9 +90,19 @@ TorrentInfoView::~TorrentInfoView()
 void TorrentInfoView::setTorrentInfo(const libtorrent::torrent_info& ti)
 {
   ui->label_name_v->setText(QString::fromStdString(ti.name()));
+
+  const bool has_comment = !ti.comment().empty();
+  ui->label_comment_s->setVisible(has_comment);
+  ui->label_comment_v->setVisible(has_comment);
   ui->label_comment_v->setText(QString::fromStdString(ti.comment()));
+
+  const bool has_created = ti.creation_date() !=0 || !ti.creator().empty();
+  ui->label_created_s->setVisible(has_created);
+  ui->label_created_v->setVisible(has_created);
   ui->label_created_v->setText(format_created(ti));
+
   ui->label_info_hash_v->setText(format_hashes(ti));
+
   ui->label_pieces_v->setText(format_pieces(ti));
   ui->label_files_v->setText(format_files(ti));
 
