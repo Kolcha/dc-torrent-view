@@ -71,15 +71,12 @@ TorrentInfoView::TorrentInfoView(QWidget* parent)
   sort_model->setSortRole(Qt::EditRole);
   sort_model->setSortCaseSensitivity(Qt::CaseInsensitive);
   ui->files_view->setModel(sort_model);
-  ui->files_view->header()->setStretchLastSection(false);
   ui->files_view->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
   ui->files_view->header()->setSectionResizeMode(0, QHeaderView::Stretch);
 
   trackers = new TorrentTrackersModel(this);
   ui->trackers_list->setModel(trackers);
-  ui->trackers_list->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-  ui->trackers_list->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
-  ui->trackers_list->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+  ui->trackers_list->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
   ui->splitter->setSizes({ui->trackers_list->minimumSizeHint().height(), height()});
 }
