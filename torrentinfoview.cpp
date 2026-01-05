@@ -6,12 +6,29 @@
 #include "ui_torrentinfoview.h"
 
 #include <QDateTime>
+#include <QRegularExpression>
 
 #include "torrentfilesmodel.hpp"
 #include "torrenttrackersmodel.hpp"
 #include "utils.hpp"
 
 namespace {
+
+QString format_comment(const lt::torrent_info& ti)
+{
+  static QRegularExpression re(R"(https?:\/\/(?:www\.)?\S+\.[a-zA-Z0-9]{1,6}\b\S*)");
+
+  auto out = QString::fromStdString(ti.comment());
+
+  auto iter = re.globalMatch(out);
+  while (iter.hasNext()) {
+    auto m = iter.next();
+    auto url = m.captured();
+    out.replace(url, QString(R"(<a href="%1">%1</a>)").arg(url));
+  }
+
+  return out;
+}
 
 QString format_created(const lt::torrent_info& ti)
 {
@@ -94,7 +111,7 @@ void TorrentInfoView::setTorrentInfo(const libtorrent::torrent_info& ti)
   const bool has_comment = !ti.comment().empty();
   ui->label_comment_s->setVisible(has_comment);
   ui->label_comment_v->setVisible(has_comment);
-  ui->label_comment_v->setText(QString::fromStdString(ti.comment()));
+  ui->label_comment_v->setText(format_comment(ti));
 
   const bool has_created = ti.creation_date() !=0 || !ti.creator().empty();
   ui->label_created_s->setVisible(has_created);

@@ -177,6 +177,9 @@
    </item>
    <item row="1" column="1" colspan="5">
     <widget class="QLabel" name="label_comment_v">
+     <property name="openExternalLinks">
+      <bool>true</bool>
+     </property>
      <property name="textInteractionFlags">
       <set>Qt::TextInteractionFlag::LinksAccessibleByMouse|Qt::TextInteractionFlag::TextSelectableByMouse</set>
      </property>
