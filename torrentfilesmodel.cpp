@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 Nick Korotysh <nick.korotysh@gmail.com>
+// SPDX-FileCopyrightText: 2024-2026 Nick Korotysh <nick.korotysh@gmail.com>
 //
 // SPDX-License-Identifier: MIT
 
@@ -274,7 +274,7 @@ void TorrentFilesModel::setTorrentInfo(const libtorrent::torrent_info& ti)
 {
   beginResetModel();
   _root = std::make_unique<FileNode>();
-  const auto& fst = ti.files();
+  const auto& fst = ti.layout();
   for (auto i : fst.file_range()) {
     add_path(*_root, QString::fromStdString(fst.file_path(i)))->setSize(fst.file_size(i));
   }

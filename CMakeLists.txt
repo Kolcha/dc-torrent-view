@@ -1,10 +1,10 @@
-# SPDX-FileCopyrightText: 2024 Nick Korotysh <nick.korotysh@gmail.com>
+# SPDX-FileCopyrightText: 2024-2026 Nick Korotysh <nick.korotysh@gmail.com>
 #
 # SPDX-License-Identifier: MIT
 
 cmake_minimum_required(VERSION 3.16)
 
-project(torrent_view VERSION 0.1 LANGUAGES CXX)
+project(torrent_view VERSION 0.2 LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -17,7 +17,7 @@ option(BUILD_DEMO_VIEWER "build torrent viewer application" OFF)
 
 set(USE_QT_MAJOR_VERSION "6" CACHE STRING "Major Qt version to use")
 find_package(Qt${USE_QT_MAJOR_VERSION} REQUIRED COMPONENTS Widgets)
-find_package(LibtorrentRasterbar 2.0 REQUIRED)
+find_package(LibtorrentRasterbar 2.1 REQUIRED)
 
 set(PROJECT_SOURCES
   torrentinfoview.cpp

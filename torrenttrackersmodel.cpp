@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 Nick Korotysh <nick.korotysh@gmail.com>
+// SPDX-FileCopyrightText: 2024-2026 Nick Korotysh <nick.korotysh@gmail.com>
 //
 // SPDX-License-Identifier: MIT
 
@@ -61,21 +61,23 @@ QVariant TorrentTrackersModel::data(const QModelIndex& index, int role) const
   return QVariant();
 }
 
-void TorrentTrackersModel::setTorrentInfo(const libtorrent::torrent_info& ti)
+void TorrentTrackersModel::setTorrentInfo(const lt::add_torrent_params& atp)
 {
   beginResetModel();
 
   _trackers.clear();
   _web_seeds.clear();
 
-  _trackers.reserve(ti.trackers().size());
-  for (const auto& e : ti.trackers()) {
-    _trackers.emplace_back(e.tier, QString::fromStdString(e.url));
+  _trackers.reserve(atp.trackers.size());
+  int tier = 0;
+  for (std::size_t i = 0; i < atp.trackers.size(); ++i) {
+    if (i < atp.tracker_tiers.size()) tier = atp.tracker_tiers[i];
+    _trackers.emplace_back(tier, QString::fromStdString(atp.trackers[i]));
   }
 
-  _web_seeds.reserve(ti.web_seeds().size());
-  for (const auto& e : ti.web_seeds()) {
-    _web_seeds.push_back(QString::fromStdString(e.url));
+  _web_seeds.reserve(atp.url_seeds.size());
+  for (const auto& url : atp.url_seeds) {
+    _web_seeds.push_back(QString::fromStdString(url));
   }
 
   endResetModel();

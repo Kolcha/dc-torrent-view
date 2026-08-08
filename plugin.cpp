@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 Nick Korotysh <nick.korotysh@gmail.com>
+// SPDX-FileCopyrightText: 2024-2026 Nick Korotysh <nick.korotysh@gmail.com>
 //
 // SPDX-License-Identifier: MIT
 
@@ -6,12 +6,15 @@
 
 #include "torrentinfoview.hpp"
 
+#include <libtorrent/load_torrent.hpp>
+
 HANDLE DCPCALL ListLoad(HANDLE parent_win, char* file_to_load, int show_flags)
 {
   Q_UNUSED(show_flags);
 
-  lt::torrent_info ti(file_to_load);
-  if (!ti.is_valid())
+  lt::error_code ec;
+  auto ti = lt::load_torrent_file(file_to_load, ec, {});
+  if (ec)
     return nullptr;
 
   auto view = new TorrentInfoView(reinterpret_cast<QWidget*>(parent_win));

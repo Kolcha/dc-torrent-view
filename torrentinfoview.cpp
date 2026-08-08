@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 Nick Korotysh <nick.korotysh@gmail.com>
+// SPDX-FileCopyrightText: 2024-2026 Nick Korotysh <nick.korotysh@gmail.com>
 //
 // SPDX-License-Identifier: MIT
 
@@ -14,11 +14,11 @@
 
 namespace {
 
-QString format_comment(const lt::torrent_info& ti)
+QString format_comment(const lt::add_torrent_params& atp)
 {
   static QRegularExpression re(R"(https?:\/\/(?:www\.)?\S+\.[a-zA-Z0-9]{1,6}\b\S*)");
 
-  auto out = QString::fromStdString(ti.comment());
+  auto out = QString::fromStdString(atp.comment);
 
   auto iter = re.globalMatch(out);
   while (iter.hasNext()) {
@@ -30,17 +30,17 @@ QString format_comment(const lt::torrent_info& ti)
   return out;
 }
 
-QString format_created(const lt::torrent_info& ti)
+QString format_created(const lt::add_torrent_params& atp)
 {
   QString res;
-  if (ti.creation_date() != 0) {
-    res += QDateTime::fromSecsSinceEpoch(ti.creation_date()).toString();
+  if (atp.creation_date != 0) {
+    res += QDateTime::fromSecsSinceEpoch(atp.creation_date).toString();
   }
-  if (ti.creation_date() != 0 && !ti.creator().empty()) {
+  if (atp.creation_date != 0 && !atp.created_by.empty()) {
     res += ", ";
   }
-  if (!ti.creator().empty()) {
-    res += QString::fromStdString(ti.creator());
+  if (!atp.created_by.empty()) {
+    res += QString::fromStdString(atp.created_by);
   }
   return res;
 }
@@ -103,30 +103,30 @@ TorrentInfoView::~TorrentInfoView()
   delete ui;
 }
 
-void TorrentInfoView::setTorrentInfo(const libtorrent::torrent_info& ti)
+void TorrentInfoView::setTorrentInfo(const lt::add_torrent_params& atp)
 {
-  ui->label_name_v->setText(QString::fromStdString(ti.name()));
-  ui->label_type_v->setText(ti.priv() ? tr("private") : tr("public"));
+  ui->label_name_v->setText(QString::fromStdString(atp.ti->name()));
+  ui->label_type_v->setText(atp.ti->priv() ? tr("private") : tr("public"));
 
-  const bool has_comment = !ti.comment().empty();
+  const bool has_comment = !atp.comment.empty();
   ui->label_comment_s->setVisible(has_comment);
   ui->label_comment_v->setVisible(has_comment);
-  ui->label_comment_v->setText(format_comment(ti));
+  ui->label_comment_v->setText(format_comment(atp));
 
-  const bool has_created = ti.creation_date() !=0 || !ti.creator().empty();
+  const bool has_created = atp.creation_date !=0 || !atp.created_by.empty();
   ui->label_created_s->setVisible(has_created);
   ui->label_created_v->setVisible(has_created);
-  ui->label_created_v->setText(format_created(ti));
+  ui->label_created_v->setText(format_created(atp));
 
-  ui->label_info_hash_v->setText(format_hashes(ti));
+  ui->label_info_hash_v->setText(format_hashes(*atp.ti));
 
-  ui->label_pieces_v->setText(format_pieces(ti));
-  ui->label_files_v->setText(format_files(ti));
+  ui->label_pieces_v->setText(format_pieces(*atp.ti));
+  ui->label_files_v->setText(format_files(*atp.ti));
 
-  trackers->setTorrentInfo(ti);
+  trackers->setTorrentInfo(atp);
   ui->trackers_list->setVisible(trackers->rowCount() > 0);
 
-  files->setTorrentInfo(ti);
+  files->setTorrentInfo(*atp.ti);
   if (ui->files_view->model()->rowCount(ui->files_view->rootIndex()) == 1) {
     ui->files_view->expand(ui->files_view->model()->index(0, 0, ui->files_view->rootIndex()));
   }

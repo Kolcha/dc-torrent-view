@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 Nick Korotysh <nick.korotysh@gmail.com>
+// SPDX-FileCopyrightText: 2024-2026 Nick Korotysh <nick.korotysh@gmail.com>
 //
 // SPDX-License-Identifier: MIT
 
@@ -6,6 +6,8 @@
 
 #include <QApplication>
 #include <QCommandLineParser>
+
+#include <libtorrent/load_torrent.hpp>
 
 int main(int argc, char* argv[])
 {
@@ -24,7 +26,7 @@ int main(int argc, char* argv[])
 
   TorrentInfoView wnd;
   if (const auto args = parser.positionalArguments(); !args.empty()) {
-    lt::torrent_info ti(args.first().toStdString());
+    auto ti = lt::load_torrent_file(args.first().toStdString());
     wnd.setTorrentInfo(ti);
   }
   wnd.show();

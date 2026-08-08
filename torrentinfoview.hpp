@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 Nick Korotysh <nick.korotysh@gmail.com>
+// SPDX-FileCopyrightText: 2024-2026 Nick Korotysh <nick.korotysh@gmail.com>
 //
 // SPDX-License-Identifier: MIT
 
@@ -6,7 +6,7 @@
 
 #include <QWidget>
 
-#include <libtorrent/torrent_info.hpp>
+#include <libtorrent/add_torrent_params.hpp>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class TorrentInfoView; }
@@ -23,7 +23,7 @@ public:
   TorrentInfoView(QWidget* parent = nullptr);
   ~TorrentInfoView();
 
-  void setTorrentInfo(const lt::torrent_info& ti);
+  void setTorrentInfo(const lt::add_torrent_params& atp);
 
 private:
   Ui::TorrentInfoView* ui;

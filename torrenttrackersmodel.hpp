@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 Nick Korotysh <nick.korotysh@gmail.com>
+// SPDX-FileCopyrightText: 2024-2026 Nick Korotysh <nick.korotysh@gmail.com>
 //
 // SPDX-License-Identifier: MIT
 
@@ -6,7 +6,7 @@
 
 #include <QAbstractTableModel>
 
-#include <libtorrent/torrent_info.hpp>
+#include <libtorrent/add_torrent_params.hpp>
 
 class TorrentTrackersModel : public QAbstractTableModel
 {
@@ -20,7 +20,7 @@ public:
 
   QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
-  void setTorrentInfo(const lt::torrent_info& ti);
+  void setTorrentInfo(const lt::add_torrent_params& atp);
 
 private:
   std::vector<std::pair<int, QString>> _trackers;
